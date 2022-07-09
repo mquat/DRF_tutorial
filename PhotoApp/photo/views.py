@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Photo
+from .forms import PhotoForm
 
 def photo_list(request):
     photos = Photo.objects.all()
@@ -9,3 +10,15 @@ def photo_list(request):
 def photo_detail(request,pk):
     photo = get_object_or_404(Photo, pk=pk)
     return render(request, 'photo/photo_detail.html', {'photo':photo})
+
+def photo_post(request):
+    if request.method == "POST":
+        form = PhotoForm(request.POST)
+        if form.is_valid():
+            #commit=True가 default. 만약 False로 설정하면, 바로 데이터베이스에 저장하지 않는다. 따라서 save()를 추가로 해줘야 함.
+            photo = form.save(commit=False)
+            photo.save()
+            return redirect('photo_detail', pk=photo.pk)
+    else:
+        form = PhotoForm()
+    return render(request, 'photo/photo_post.html', {'form': form})
