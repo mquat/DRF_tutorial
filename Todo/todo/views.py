@@ -11,22 +11,35 @@ def todo_detail(request, pk):
     return render(request, 'todo/todo_detail.html', {'todo':todo})
 
 def todo_post(request):
-    form = TodoForm(request.POST)
-    if form.is_valid():
-        todo = form.save(commit=false)
-        todo.save()
-        return redirect('todo_list')
+    if request.method == "POST":
+        form = TodoForm(request.POST)
+        if form.is_valid():
+            todo = form.save(commit=False)
+            todo.save()
+            return redirect('todo_list')
     else:
         form = TodoForm()
     return render(request, 'todo/todo_post.html', {'form':form})
 
-
 def todo_edit(request, pk):
     todo = Todo.objects.get(id=pk)
-    if request == "POST":
-        form TodoForm(request.POST, instance=todo)
-        todo.save()
-        return redirect('todo_list')
+    if request.method == "POST":
+        form = TodoForm(request.POST, instance=todo)
+        if form.is_valid():
+            todo = form.save(commit=False)
+            todo.save()
+            return redirect('todo_list')
     else:
         form = TodoForm(instance=todo)
     return render(request, 'todo/todo_post.html', {'form':form})
+
+def done_list(request):
+    dones = Todo.objects.filter(complete=True)
+    return render(request, 'todo/done_list.html', {'dones':dones})
+
+#완료 기능 : 완료 버튼을 누르면, todo의 Complete를 true로 설정해줌
+def todo_done(request, pk):
+    todo = Todo.objects.get(id=pk)
+    todo.complete = True
+    todo.save()
+    return redirect('todo_list')
